@@ -47,3 +47,60 @@ git clone <repo> <directory>
 ```
 
 `git log`可以查看修改的
+
+
+
+## 回滚
+
+用`HEAD`表示当前版本，上一个版本就是`HEAD^`，上上一个版本就是`HEAD^^`，当然往上100个版本写100个`^`比较容易数不过来，所以写成`HEAD~100`
+
+```
+git reset --hard HEAD^
+git reset --hard 1094a
+```
+
+`HEAD`指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令`git reset --hard commit_id`
+
+穿梭前，用`git log`可以查看提交历史，以便确定要回退到哪个版本
+
+要重返未来，用`git reflog`查看命令历史，以便确定要回到未来的哪个版本
+
+
+
+## 修改
+
+`git checkout -- file`可以丢弃工作区的修改：
+
+```
+git checkout -- readme.txt
+```
+
+命令`git checkout -- readme.txt`意思就是，把`readme.txt`文件在工作区的修改全部撤销，这里有两种情况：
+
+一种是`readme.txt`自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+
+一种是`readme.txt`已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+
+总之，就是让这个文件回到最近一次`git commit`或`git add`时的状态。
+
+
+
+用命令`git reset HEAD `可以把暂存区的修改撤销掉（unstage），重新放回工作区
+
+```
+git reset HEAD readme.txt
+```
+
+## 删除
+
+一是确实要从版本库中删除该文件，那就用命令`git rm`删掉，并且`git commit`
+
+先手动删除文件，然后使用git add 和git rm效果是一样的
+
+另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
+
+```
+$ git checkout -- test.txt
+```
+
+## 远程remote
