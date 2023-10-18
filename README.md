@@ -69,7 +69,7 @@ git reset --hard 1094a
 
 ## 修改
 
-`git checkout -- file`可以丢弃工作区的修改：
+`git checkout --file`可以丢弃工作区的修改：
 
 ```
 git checkout -- readme.txt
@@ -100,7 +100,7 @@ git reset HEAD readme.txt
 另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
 
 ```
-$ git checkout -- test.txt
+$ git checkout --test.txt
 ```
 
 ## 远程remote
@@ -119,7 +119,7 @@ git remote rm origin 可以删除
 
 ```
 本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程
-
+git push -u origin master
 由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令
 
 从现在起，只要本地作了提交，就可以通过命令：
@@ -132,5 +132,12 @@ git push origin master
 
 `HEAD`严格来说不是指向提交，而是指向`master`，`master`才是指向提交的，所以，`HEAD`指向的就是当前分支
 
+```
+git branch # 查看当前有哪些分支
+git branch dev # 创建一个新的分支
+git switch master / git checkout master # 切换到master分支 
+git merge dev  #合并dev分支到当前分支
+git branch -d dev #删除dev分支
+```
+create a new branch is quick and simple
 
-create a new branch dev
