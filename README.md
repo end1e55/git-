@@ -128,3 +128,9 @@ git push origin master
 
 
 
+## 分支管理
+
+`HEAD`严格来说不是指向提交，而是指向`master`，`master`才是指向提交的，所以，`HEAD`指向的就是当前分支
+
+
+create a new branch dev
