@@ -1,0 +1,211 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <map>
+#define y1 y114514
+
+std::map<int, double>ammunition_maxnum;
+std::map<int, double>ammunition_money;
+std::map<int, double>plantfrom_money;
+std::map<int, double>radius;
+double r[] = {300,150,50,35,4000,2350,3500,1700,1560,1506,500, 800};//弹药打击半径，B军种的平台部署半径已经计算在内
+std::string dd[] = {"LD1", "LD2", "LD3", "LD4", "LD5", "KD1", "KD2", "KD3", "KD4", "KD5", "HD1", "HD2"};
+std::string platform[]= {"L1", "L2", "L3", "L4", "L5", "K1", "K2", "H1", "H2"};
+double dx[] = {8829, 8906, 8769, 8825, 8822, 8807, 8704, 8668, 8801, 8823, 9559, 8920, 9000, 9500, 8600, 8800};
+double dy[] = {4165, 3960, 4155, 3972, 3987, 4082, 4285, 4259, 3983, 4009, 5150, 5676, 4700, 3500, 2600, 2800}; 
+
+struct node1
+{
+    int id, quyu, pl, dan;//区域 平台序号 弹药序号
+    double num_pao, money;
+};
+void print(node1 now)
+{
+    std::cout << "武器平台:" << platform[now.pl];
+    std::cout << " 区域为:" << now.quyu+1;
+    std::cout << " 武器平台数量: " << ceil(now.num_pao / ammunition_maxnum[now.dan]);
+    std::cout << " 炮弹数量: " << now.num_pao;
+    std::cout << " 成本为: " << now.money << std::endl;
+}
+struct node2
+{
+    std::vector<node1>tr;
+    bool operator < (const node2 &x)const
+    {
+        return tr[0].money < x.tr[0].money;
+    }
+} ar[205];
+
+struct mode_daji
+{
+    int plantfrom_id, dan_id;
+    double plantfrom_sun;
+    int plantfrom_num;//
+    double dan_sun, num_real, money;
+    bool operator < (const mode_daji &x)const
+    {
+        return money < x.money;
+    }
+};
+struct model_node
+{
+    double x, y;
+    int n;
+    std::vector<mode_daji>v;
+} br[200];
+
+struct node3
+{
+    std::vector<int>center;//能部署该平台的区域中心坐标
+} cr[20]; //12种平台可以对应的区域的id
+
+double dis(double x1, double y1, double x2, double y2)
+{
+    return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
+int cmp_id;
+// 比较标准
+bool cmp(node2 x, node2 y)
+{
+//关联点和有备打需求的点排在前面
+    int cp1 = 1, cp2 = 1;
+    if(x.tr[0].id == 11 || x.tr[0].id == 1 || x.tr[0].id == 2 || x.tr[0].id == 23 || x.tr[0].id == 86 || x.tr[0].id == 56 || x.tr[0].id == 66 || x.tr[0].id == 84)
+        cp1 = 0;
+    if(y.tr[0].id == 11 ||  y.tr[0].id == 1 || y.tr[0].id == 2 || y.tr[0].id == 23|| y.tr[0].id == 86 || y.tr[0].id == 56 || y.tr[0].id == 66 || y.tr[0].id == 84)
+        cp2 = 0;
+    if(cp1 != cp2)
+        return cp1 < cp2;
+//再按平台的种类进行分
+    if(x.tr[cmp_id].pl != y.tr[cmp_id].pl)
+        return x.tr[cmp_id].pl < y.tr[cmp_id].pl;
+    else
+{//如果平台种类相同
+        if(x.tr.size() != y.tr.size())//满足半径的方案数量少的优先
+        {
+            return x.tr.size() < y.tr.size();
+        }
+        if(x.tr[cmp_id].num_pao != y.tr[cmp_id].num_pao)
+        {
+            return x.tr[cmp_id].num_pao < y.tr[cmp_id].num_pao;
+        }
+        if(x.tr[cmp_id+1].money - x.tr[cmp_id].money != y.tr[cmp_id+1].money - y.tr[cmp_id].money)//钱差值大的优先，贪心模型，国王的游戏
+        {
+            return x.tr[cmp_id+1].money - x.tr[cmp_id].money > y.tr[cmp_id+1].money - y.tr[cmp_id].money;
+        }
+        else
+        {
+            for(int i = cmp_id+1; i < x.tr.size(); ++i)
+            {
+                if(x.tr[i].money != y.tr[i].money)
+                {
+                    return x.tr[i].money > y.tr[i].money;
+                }
+            }
+            return x.tr[cmp_id].id < y.tr[cmp_id].id;//如果都相同就按序号排序
+        }
+    }
+}
+
+int main(void)
+{
+    cr[0].center.push_back(0);
+    cr[0].center.push_back(1);
+    cr[1].center.push_back(2);
+    cr[1].center.push_back(3);
+    cr[2].center.push_back(4);
+    cr[2].center.push_back(5);
+    cr[2].center.push_back(6);
+    cr[3].center.push_back(7);
+    cr[2].center.push_back(8);
+    cr[2].center.push_back(9);
+    cr[4].center.push_back(10);
+    cr[4].center.push_back(11);
+    cr[5].center.push_back(12);
+    cr[5].center.push_back(13);
+    cr[6].center.push_back(12);
+    cr[6].center.push_back(13);
+    cr[7].center.push_back(14);
+    cr[7].center.push_back(15);
+    cr[8].center.push_back(14);
+    cr[8].center.push_back(15);
+
+    ammunition_maxnum[0] = 8;
+    ammunition_maxnum[1] = 12;
+    ammunition_maxnum[2] = 270;
+    ammunition_maxnum[3] = 270;
+    ammunition_maxnum[4] = 1;
+    ammunition_maxnum[5] = 6;
+    ammunition_maxnum[6] = 4;
+    ammunition_maxnum[7] = 4;
+    ammunition_maxnum[8] = 4;
+    ammunition_maxnum[9] = 8;
+    ammunition_maxnum[10] = 16;
+    ammunition_maxnum[11] = 16;
+
+    ammunition_money[0] = 0.5;
+    ammunition_money[1] = 0.1;
+    ammunition_money[2] = 0.03;
+    ammunition_money[3] = 0.01;
+    ammunition_money[4] = 25;
+    ammunition_money[5] = 5;
+    ammunition_money[6] = 12;
+    ammunition_money[7] = 3;
+    ammunition_money[8] = 2.6;
+    ammunition_money[9] = 0.66;
+    ammunition_money[10] = 2;
+    ammunition_money[11] = 4;
+
+    plantfrom_money[0] = 500;
+    plantfrom_money[1] = 300;
+    plantfrom_money[2] = 200;
+    plantfrom_money[3] = 150;
+    plantfrom_money[4] = 900;
+    plantfrom_money[5] = 600;
+    plantfrom_money[6] = 400;
+    plantfrom_money[7] = 1000;
+    plantfrom_money[8] = 800;
+
+    int n;
+    std::cin >> n;
+    for(int k = 1; k <= n; ++k)
+    {
+        std::cin >> br[k].x >> br[k].y >> br[k].n;//读入坐标和数量
+        for(int j = 1; j <= br[k].n; ++j)
+        {
+            mode_daji now;
+            scanf("%d%d%lf%lf", &now.plantfrom_id, &now.dan_id,&now.plantfrom_sun,&now.num_real);
+            now.plantfrom_num = ceil(now.num_real / ammunition_maxnum[now.dan_id]);
+            now.money = now.num_real * ammunition_money[now.dan_id] + now.plantfrom_num *  now.plantfrom_sun * plantfrom_money[now.plantfrom_id];
+            br[k].v.push_back(now);
+        }
+        sort(br[k].v.begin(), br[k].v.end());
+        for(auto p : br[k].v)
+        {
+            for(auto id : cr[p.plantfrom_id].center)
+            {
+                double radius = r[p.dan_id];
+                if(dis(br[k].x, br[k].y, dx[id], dy[id]) < radius)
+                {
+                    if(!ar[k].tr.empty() && ar[k].tr.back().pl == p.plantfrom_id)
+                        continue;
+                    ar[k].tr.push_back({k, id, p.plantfrom_id, p.dan_id, p.num_real, p.money});
+                }
+            }
+        }
+        ar[k].tr.push_back({100,100,100,100,100,0x3f3f3f3f});
+    }
+    std::sort(ar+1, ar+1+90, cmp);
+    for(int i = 1; i <= 90; ++i)
+    {
+        std::cout << "*** " << i << " ***\n";
+        for(int j = 0; j < ar[i].tr.size(); ++j)
+        {
+            print(ar[i].tr[j]);
+        }
+    }
+    return 0;
+}
